@@ -32,7 +32,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
   var doh = "https://mozilla.cloudflare-dns.com/dns-query";
   var dns = async (domain) => {
-    const response = await fetch(`${doh}?name=${domain}`, {
+    const response = await fetch(`${doh}?name=${domain}&type=A`, {
       method: "GET",
       headers: {
         "Accept": "application/dns-json"
@@ -136,11 +136,11 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         vlessResponseHeader = new Uint8Array([vlessVersion![0], 0]);
         const rawClientData = chunk.slice(rawDataIndex!);
         let queryip = "";
-        if (addressType === 2) {
-          queryip = await dns(addressRemote);
-          if (queryip && isCloudFlareIP(queryip)) {
+        queryip = await dns(addressRemote);
+        if (queryip && isCloudFlareIP(queryip)) {
             queryip = "dns2.easydns.com";
-          }
+        } else {
+            queryip = addressRemote;
         }
         remoteSocket = connect({
           hostname: queryip ? queryip : addressRemote,
